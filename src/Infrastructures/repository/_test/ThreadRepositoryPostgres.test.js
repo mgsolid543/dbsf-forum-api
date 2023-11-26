@@ -2,6 +2,8 @@ const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const pool = require('../../database/postgres/pool');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
+const AddThread = require('../../../Domains/threads/entities/AddThread');
+const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 
 describe('ThreadRepositoryPostgres', () => {
   afterEach(async () => {
@@ -23,6 +25,32 @@ describe('ThreadRepositoryPostgres', () => {
        * Pada pengujian ini, manfaatkanlah fungsi `ThreadsTableTestHelper.findThreadById`
        * untuk mengecek data `thread` yang ada di database berdasarkan id thread.
        */
+      await UsersTableTestHelper.addUser({});
+      const addThread = new AddThread({
+        title: 'a thread',
+        body: 'this a body thread',
+        owner: 'user-123',
+      });
+      const fakeIdGenerator = () => '123';
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(
+          pool,
+          fakeIdGenerator,
+      );
+      const addedThread = await threadRepositoryPostgres.addThread(
+          addThread,
+          'user-123',
+      );
+      const thread = await ThreadsTableTestHelper.findThreadById(
+          'thread-123',
+      );
+      expect(addedThread).toStrictEqual(
+          new AddedThread({
+            id: `thread-${fakeIdGenerator()}`,
+            title: 'a thread',
+            owner: 'user-123',
+          }),
+      );
+      expect(thread).toBeDefined();
     });
   });
 
