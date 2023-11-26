@@ -34,15 +34,15 @@ describe('AddedThread entities', () => {
      * yang mengecek nilai-nilai properti yang berada di dalam objek `addedThread`.
      */
     const payload = {
-      id: 'thread-001',
-      title: 'irpan',
-      owner: 'irpan',
+      id: 'thread-id',
+      title: 'thread-title',
+      owner: 'thread-owner',
     };
 
-    const addedThread = new AddedThread(payload);
+    const {id, title, owner,} = new AddedThread(payload);
 
-    expect(addedThread.id).toEqual(payload.id);
-    expect(addedThread.title).toEqual(payload.title);
-    expect(addedThread.owner).toEqual(payload.owner);
+    expect(id).toEqual(payload.id);
+    expect(title).toEqual(payload.title);
+    expect(owner).toEqual(payload.owner);
   });
 });
