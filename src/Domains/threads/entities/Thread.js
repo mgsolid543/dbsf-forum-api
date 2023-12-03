@@ -1,5 +1,3 @@
-const Comment = require('../../comments/entities/Comment');
-
 class Thread {
   constructor(payload) {
     this._verifyPayload(payload);
@@ -13,7 +11,6 @@ class Thread {
     this.body = body;
     this.date = date;
     this.username = username;
-    this.comments = [];
   }
 
   /**
