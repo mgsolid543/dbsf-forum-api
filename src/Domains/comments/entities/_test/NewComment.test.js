@@ -36,9 +36,11 @@ describe("a NewComment entities", () => {
         };
 
         // Action
-        const { content } = new NewComment(payload);
+        const { content, threadId, owner } = new NewComment(payload);
 
         // Assert
         expect(content).toEqual(payload.content);
+        expect(threadId).toEqual(payload.threadId);
+        expect(owner).toEqual(payload.owner);
     });
 });
