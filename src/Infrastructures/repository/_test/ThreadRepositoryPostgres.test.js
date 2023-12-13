@@ -2,8 +2,7 @@ const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const pool = require('../../database/postgres/pool');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
-const AddThread = require('../../../Domains/threads/entities/AddThread');
-const AddedThread = require('../../../Domains/threads/entities/AddedThread');
+const AddThread = require('../../../Domains/threads/entities/NewThread');
 
 describe('ThreadRepositoryPostgres', () => {
   afterEach(async () => {
@@ -18,7 +17,7 @@ describe('ThreadRepositoryPostgres', () => {
   describe('addThread', () => {
     it('should persist new thread and return added thread correctly', async () => {
       /**
-       * TODO 4
+       * @TODO 4
        * Lengkapi pengujian fungsi `addThread` agar kita dapat
        * memastikan bahwa fungsi tersebut memasukkan data ke dalam database dengan benar.
        *
@@ -37,19 +36,16 @@ describe('ThreadRepositoryPostgres', () => {
           fakeIdGenerator,
       );
       const addedThread = await threadRepositoryPostgres.addThread(
-          addThread,
-          'user-123',
+          addThread
       );
       const thread = await ThreadsTableTestHelper.findThreadById(
           'thread-123',
       );
-      expect(addedThread).toStrictEqual(
-          new AddedThread({
-            id: `thread-${fakeIdGenerator()}`,
-            title: 'a thread',
-            owner: 'user-123',
-          }),
-      );
+
+      expect(addedThread.id).toEqual('thread-123');
+      expect(addedThread.title).toEqual(addThread.title);
+      expect(addedThread.owner).toEqual(addThread.owner);
+
       expect(thread).toBeDefined();
     });
   });

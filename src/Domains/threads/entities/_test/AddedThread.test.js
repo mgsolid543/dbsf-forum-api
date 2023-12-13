@@ -1,5 +1,4 @@
 const AddedThread = require('../AddedThread');
-const {add} = require("nodemon/lib/rules");
 
 describe('AddedThread entities', () => {
   it('should throw error when payload did not contain needed property', () => {

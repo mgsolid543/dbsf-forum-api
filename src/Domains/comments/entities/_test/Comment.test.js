@@ -1,51 +1,70 @@
-const Comment = require("../Comment");
+const Comment = require('../Comment');
 
-describe("a Comment entities", () => {
-    it("should throw error when payload did not contain needed property", () => {
-        // Arrange
-        const payload = {
-            id: "comment-123",
-            username: "budi",
-        };
+describe('Comment entities', () => {
+  it('should throw error when payload did not contain needed property', () => {
+    // Arrange
+    const payload = {
+      id: 'comment-123',
+      username: 'dicoding',
+      date: '2021-08-08T07:59:57.000Z',
+      content: 'sebuah comment',
+    };
 
-        // Action and Assert
-        expect(() => new Comment(payload)).toThrowError(
-            "COMMENT.NOT_CONTAIN_NEEDED_PROPERTY"
-        );
-    });
+    // Action and Assert
+    expect(() => new Comment(payload)).toThrowError('COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
+  });
 
-    it("should throw error when payload did not meet data type specification", () => {
-        // Arrange
-        const payload = {
-            id: true,
-            username: 12,
-            content: ["example content"],
-            date: '2023-01-01',
-            isDelete: true,
-        };
+  it('should throw error when payload did not meet data type specification', () => {
+    // Arrange
+    const payload = {
+      id: 'comment-123',
+      username: 'dicoding',
+      date: '2021-08-08T07:59:57.000Z',
+      content: 'sebuah comment',
+      isDelete: 'false',
+    };
 
-        // Action and Assert
-        expect(() => new Comment(payload)).toThrowError(
-            "COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION"
-        );
-    });
+    // Action and Assert
+    expect(() => new Comment(payload)).toThrowError('COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
+  });
 
-    it("should create Comment object correctly", () => {
-        // Arrange
-        const payload = {
-            id: "comment-123",
-            username: "hanasa",
-            content: "example content",
-            date: "2023-01-01",
-            isDelete: false,
-        };
+  it('should create comment object correctly', () => {
+    // Arrange
+    const payload = {
+      id: 'comment-123',
+      username: 'dicoding',
+      date: '2021-08-08T07:59:57.000Z',
+      content: 'sebuah comment',
+      isDelete: false,
+    };
 
-        // Action
-        const { id, username, content } = new Comment(payload);
+    // Action
+    const comment = new Comment(payload);
 
-        // Assert
-        expect(id).toEqual(payload.id);
-        expect(username).toEqual(payload.username);
-        expect(content).toEqual(payload.content);
-    });
+    // Assert
+    expect(comment.id).toEqual(payload.id);
+    expect(comment.username).toEqual(payload.username);
+    expect(comment.date).toEqual(payload.date);
+    expect(comment.content).toEqual(payload.content);
+  });
+
+  it('should create deleted comment object correctly', () => {
+    // Arrange
+    const payload = {
+      id: 'comment-123',
+      username: 'dicoding',
+      date: '2021-08-08T07:59:57.000Z',
+      content: 'sebuah comment',
+      isDelete: true,
+    };
+
+    // Action
+    const comment = new Comment(payload);
+
+    // Assert
+    expect(comment.id).toEqual(payload.id);
+    expect(comment.username).toEqual(payload.username);
+    expect(comment.date).toEqual(payload.date);
+    expect(comment.content).toEqual('**komentar telah dihapus**');
+  });
 });

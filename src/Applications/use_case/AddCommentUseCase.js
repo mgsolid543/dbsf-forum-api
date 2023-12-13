@@ -1,4 +1,5 @@
 const NewComment = require('../../Domains/comments/entities/NewComment');
+
 class AddCommentUseCase {
   constructor({ commentRepository, threadRepository }) {
     this._commentRepository = commentRepository;
@@ -20,9 +21,12 @@ class AddCommentUseCase {
      * - Kembalikan method `execute` dengan nilai yang dihasilkan dari pemanggilan
      *   fungsi `this._commentRepository.addComment(newComment);`
      */
-
     const newComment = new NewComment(useCasePayload);
-    await this._threadRepository.getThreadById(newComment.threadId);
+    const isThreadExist = await this._threadRepository.isThreadExist(newComment.threadId);
+
+    if (!isThreadExist) {
+      throw new Error('ADD_COMMENT_USE_CASE.COMMENT_NOT_FOUND');
+    }
     return this._commentRepository.addComment(newComment);
   }
 }

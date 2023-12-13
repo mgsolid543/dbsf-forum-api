@@ -1,54 +1,106 @@
+const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
+const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const DeleteCommentUseCase = require('../DeleteCommentUseCase');
-const DeleteAuthenticationUseCase = require("../DeleteAuthenticationUseCase");
-const AuthenticationRepository = require("../../../Domains/authentications/AuthenticationRepository");
 
 describe('DeleteCommentUseCase', () => {
-    it('should throw error if use case payload not contain refresh token', async () => {
-        // Arrange
-        const useCasePayload = {};
-        const deleteCommentUseCase = new DeleteCommentUseCase({});
+  it('should throw error when thread is not exists', async () => {
+    // Arrange
+    const useCasePayload = {
+      id: 'comment-123',
+      threadId: 'thread-123',
+      owner: 'user-123',
+    };
 
-        // Action & Assert
-        await expect(deleteCommentUseCase.execute(useCasePayload))
-            .rejects
-            .toThrowError('DELETE_COMMENT_USE_CASE.NOT_CONTAIN_REFRESH_TOKEN');
+    const mockThreadRepository = new ThreadRepository();
+    mockThreadRepository.isThreadExist = jest.fn(() => Promise.resolve(false));
+    const mockCommentRepository = new CommentRepository();
+    const useCase = new DeleteCommentUseCase({
+      commentRepository: mockCommentRepository,
+      threadRepository: mockThreadRepository,
+    });
+    const expectedError = new Error('DELETE_COMMENT_USE_CASE.THREAD_NOT_FOUND');
+
+    // Action and Assert
+    await expect(useCase.execute(useCasePayload)).rejects.toThrowError(expectedError);
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(useCasePayload.threadId);
+  });
+
+  it('should throw error when comment is not exists', async () => {
+    // Arrange
+    const useCasePayload = {
+      id: 'comment-123',
+      threadId: 'thread-123',
+      owner: 'user-123',
+    };
+
+    const mockThreadRepository = new ThreadRepository();
+    mockThreadRepository.isThreadExist = jest.fn(() => Promise.resolve(true));
+    const mockCommentRepository = new CommentRepository();
+    mockCommentRepository.isCommentExist = jest.fn(() => Promise.resolve(false));
+    const useCase = new DeleteCommentUseCase({
+      commentRepository: mockCommentRepository,
+      threadRepository: mockThreadRepository,
+    });
+    const expectedError = new Error('DELETE_COMMENT_USE_CASE.COMMENT_NOT_FOUND');
+
+    // Action and Assert
+    await expect(useCase.execute(useCasePayload)).rejects.toThrowError(expectedError);
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(useCasePayload.threadId);
+    expect(mockCommentRepository.isCommentExist).toBeCalledWith(useCasePayload.id);
+  });
+
+  it('should throw error when user is not comment owner', async () => {
+    // Arrange
+    const useCasePayload = {
+      id: 'comment-123',
+      threadId: 'thread-123',
+      owner: 'user-123',
+    };
+
+    const mockThreadRepository = new ThreadRepository();
+    mockThreadRepository.isThreadExist = jest.fn(() => Promise.resolve(true));
+    const mockCommentRepository = new CommentRepository();
+    mockCommentRepository.isCommentExist = jest.fn(() => Promise.resolve(true));
+    mockCommentRepository.isCommentOwner = jest.fn(() => Promise.resolve(false));
+    const useCase = new DeleteCommentUseCase({
+      commentRepository: mockCommentRepository,
+      threadRepository: mockThreadRepository,
+    });
+    const expectedError = new Error('DELETE_COMMENT_USE_CASE.COMMENT_NOT_OWNED');
+
+    // Action and Assert
+    await expect(useCase.execute(useCasePayload)).rejects.toThrowError(expectedError);
+  });
+
+  it('should orchestrating the delete comment action correctly', async () => {
+    // Arrange
+    const useCasePayload = {
+      id: 'comment-123',
+      threadId: 'thread-123',
+      owner: 'user-123',
+    };
+
+    const mockThreadRepository = new ThreadRepository();
+    mockThreadRepository.isThreadExist = jest.fn(() => Promise.resolve(true));
+    const mockCommentRepository = new CommentRepository();
+    mockCommentRepository.isCommentExist = jest.fn(() => Promise.resolve(true));
+    mockCommentRepository.isCommentOwner = jest.fn(() => Promise.resolve(true));
+    mockCommentRepository.deleteComment = jest.fn(() => Promise.resolve());
+    const useCase = new DeleteCommentUseCase({
+      commentRepository: mockCommentRepository,
+      threadRepository: mockThreadRepository,
     });
 
-    it('should throw error if refresh token not string', async () => {
-        // Arrange
-        const useCasePayload = {
-            refreshToken: 123,
-        };
-        const deleteAuthenticationUseCase = new DeleteAuthenticationUseCase({});
+    // Action
+    await useCase.execute(useCasePayload);
 
-        // Action & Assert
-        await expect(deleteAuthenticationUseCase.execute(useCasePayload))
-            .rejects
-            .toThrowError('DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');
-    });
-
-    it('should orchestrating the delete authentication action correctly', async () => {
-        // Arrange
-        const useCasePayload = {
-            refreshToken: 'refreshToken',
-        };
-        const mockAuthenticationRepository = new AuthenticationRepository();
-        mockAuthenticationRepository.checkAvailabilityToken = jest.fn()
-            .mockImplementation(() => Promise.resolve());
-        mockAuthenticationRepository.deleteToken = jest.fn()
-            .mockImplementation(() => Promise.resolve());
-
-        const deleteAuthenticationUseCase = new DeleteAuthenticationUseCase({
-            authenticationRepository: mockAuthenticationRepository,
-        });
-
-        // Action
-        await deleteAuthenticationUseCase.execute(useCasePayload);
-
-        // Assert
-        expect(mockAuthenticationRepository.checkAvailabilityToken)
-            .toHaveBeenCalledWith(useCasePayload.refreshToken);
-        expect(mockAuthenticationRepository.deleteToken)
-            .toHaveBeenCalledWith(useCasePayload.refreshToken);
-    });
+    // Assert
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(useCasePayload.threadId);
+    expect(mockCommentRepository.isCommentExist).toBeCalledWith(useCasePayload.id);
+    expect(mockCommentRepository.isCommentOwner).toBeCalledWith(
+      useCasePayload.id,
+      useCasePayload.owner,
+    );
+    expect(mockCommentRepository.deleteComment).toBeCalledWith(useCasePayload.id);
+  });
 });
