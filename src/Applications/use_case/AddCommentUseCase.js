@@ -25,7 +25,7 @@ class AddCommentUseCase {
     const isThreadExist = await this._threadRepository.isThreadExist(newComment.threadId);
 
     if (!isThreadExist) {
-      throw new Error('ADD_COMMENT_USE_CASE.COMMENT_NOT_FOUND');
+      throw new Error('ADD_COMMENT_USE_CASE.THREAD_NOT_FOUND');
     }
     return this._commentRepository.addComment(newComment);
   }

@@ -14,7 +14,7 @@ describe('AddCommentUseCase', () => {
         const mockThreadRepository = new ThreadRepository();
         const mockCommentRepository = new CommentRepository();
         mockThreadRepository.isThreadExist = jest.fn(() => Promise.resolve(false));
-        const expectedError = new Error('ADD_COMMENT_USE_CASE.COMMENT_NOT_FOUND');
+        const expectedError = new Error('ADD_COMMENT_USE_CASE.THREAD_NOT_FOUND');
 
         const useCase = new AddCommentUseCase({
             commentRepository: mockCommentRepository,
